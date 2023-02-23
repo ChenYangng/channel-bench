@@ -249,6 +249,22 @@ if(KernelArchARM)
 	)
 endif()
 
+if(KernelArchLoongarch)
+    file(
+        GLOB
+            arch_deps
+            src/mastik_loongarch/*.S
+			src/aes/*.c
+			src/mastik_loongarch/*.c
+			src/MPI/*.c
+	)
+	file(
+		GLOB
+			arch_include
+			src/mastik_loongarch
+	)
+endif()
+
 if(BenchSplash)
 	file(
 		GLOB

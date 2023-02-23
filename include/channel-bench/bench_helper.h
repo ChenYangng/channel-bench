@@ -120,6 +120,16 @@ static inline uint32_t rdtscp() {
 }
 #endif /*CONFIG_ARCH_X86*/
 
+#ifdef CONFIG_ARCH_LOONGARCH
+
+static inline uint32_t rdtime() {
+    uint32_t rv;
+    asm volatile("rdtime.d %0,%1" : "=r" (rv) :: );
+    return rv;
+}
+
+#endif /* CONFIG_ARCH_LOONGARCH */
+
 static inline int wait_init_msg_from(seL4_CPtr endpoint) {
 
     seL4_Word badge; 
