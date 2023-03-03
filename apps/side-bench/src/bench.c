@@ -32,18 +32,33 @@ static int (*covert_bench_fun[BENCH_COVERT_FUNS])(bench_env_t *) = {NULL,
     NULL, NULL, 
     NULL, NULL, 
     l1_trojan, l1_spy, 
-    l1i_trojan, l1i_spy,
-    l3_kd_trojan, l3_kd_spy,
-    tlb_trojan, tlb_spy,
-    btb_trojan, btb_spy,
-    l3_trojan_single, l3_spy_single,
-    bp_trojan, bp_spy,
-    l3_trojan, l3_spy,
-    timer_high, timer_low,
+    NULL, NULL, 
+    NULL, NULL, 
+    NULL, NULL, 
+    NULL, NULL, 
+    NULL, NULL, 
+    NULL, NULL, 
+    NULL, NULL, 
+    NULL, NULL, 
 };
 
-static int (*flush_bench_fun[BENCH_CACHE_FLUSH_FUNS])(bench_env_t *) = 
-{l1_cache_nothing, l1_cache_flush, l1_cache_flush,llc_cache_flush, llc_attack_flush, l1_cache_flush, l1_cache_flush_only, llc_cache_flush_only, bench_idle};  
+/* static int (*covert_bench_fun[BENCH_COVERT_FUNS])(bench_env_t *) = {NULL, */ 
+/*     l1_trojan, l1_spy, */  
+/*     NULL, NULL, */ 
+/*     NULL, NULL, */ 
+/*     l1_trojan, l1_spy, */ 
+/*     l1i_trojan, l1i_spy, */
+/*     l3_kd_trojan, l3_kd_spy, */
+/*     tlb_trojan, tlb_spy, */
+/*     btb_trojan, btb_spy, */
+/*     l3_trojan_single, l3_spy_single, */
+/*     bp_trojan, bp_spy, */
+/*     l3_trojan, l3_spy, */
+/*     timer_high, timer_low, */
+/* }; */
+
+/* static int (*flush_bench_fun[BENCH_CACHE_FLUSH_FUNS])(bench_env_t *) = */ 
+/* {l1_cache_nothing, l1_cache_flush, l1_cache_flush,llc_cache_flush, llc_attack_flush, l1_cache_flush, l1_cache_flush_only, llc_cache_flush_only, bench_idle}; */  
 
 
 #ifdef CONFIG_BENCH_SPLASH
@@ -106,7 +121,7 @@ static splash_para_t splash_bench_parameter[BENCH_SPLASH_FUNS] = {
 #endif /*CONFIG_BENCH_SPLASH*/
 
 /* dummy global for libsel4muslcsys */
-char _cpio_archive[1];
+extern char _cpio_archive[1];
 
 
 
@@ -170,7 +185,7 @@ int run_bench_covert(bench_env_t *bench_env) {
 #ifdef CONFIG_ARCH_ARM 
     SEL4BENCH_READ_CCNT(seed);  
 #elif defined CONFIG_ARCH_LOONGARCH
-    seed = rdtime();
+    seed = drdtime();
 #else 
     seed = rdtscp();
 #endif 
@@ -183,14 +198,14 @@ int run_bench_covert(bench_env_t *bench_env) {
 }
 
 
-int run_bench_cache_flush(bench_env_t *bench_env) {
+/* int run_bench_cache_flush(bench_env_t *bench_env) { */
 
-    int test_num = bench_env->args->test_num; 
+/*     int test_num = bench_env->args->test_num; */ 
 
-    assert(flush_bench_fun[test_num - BENCH_CACHE_FLUSH_FUN_START]); 
+/*     assert(flush_bench_fun[test_num - BENCH_CACHE_FLUSH_FUN_START]); */ 
 
-    return flush_bench_fun[test_num - BENCH_CACHE_FLUSH_FUN_START](bench_env);
-}
+/*     return flush_bench_fun[test_num - BENCH_CACHE_FLUSH_FUN_START](bench_env); */
+/* } */
 
 #ifdef CONFIG_BENCH_SPLASH
 

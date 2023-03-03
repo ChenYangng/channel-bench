@@ -122,11 +122,14 @@ static inline uint32_t rdtscp() {
 
 #ifdef CONFIG_ARCH_LOONGARCH
 
-static inline uint32_t rdtime() {
+static inline uint32_t drdtime() {
     uint32_t rv;
-    asm volatile("rdtime.d %0,%1" : "=r" (rv) :: );
+    uint32_t rID;
+    asm volatile("rdtime.d %0, %1" : "=r" (rv), "=r" (rID) :: );
     return rv;
 }
+
+static inline uint32_t rdtscp() { return drdtime(); }
 
 #endif /* CONFIG_ARCH_LOONGARCH */
 

@@ -254,9 +254,9 @@ if(KernelArchLoongarch)
         GLOB
             arch_deps
             src/mastik_loongarch/*.S
-			src/aes/*.c
+			# src/aes/*.c
 			src/mastik_loongarch/*.c
-			src/MPI/*.c
+			# src/MPI/*.c
 	)
 	file(
 		GLOB

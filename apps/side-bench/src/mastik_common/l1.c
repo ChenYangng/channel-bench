@@ -24,7 +24,7 @@ static int probelist(void *pp, int segments, int seglen, uint16_t *results) {
       s = rdtscp();
 #endif 
 #ifdef CONFIG_ARCH_LOONGARCH
-      s = rdtime();
+      s = drdtime();
 #endif
       for (int i = seglen; i--; ) {
           // Under normal circumstances, p is never NULL. 
@@ -44,7 +44,7 @@ static int probelist(void *pp, int segments, int seglen, uint16_t *results) {
     res = rdtscp() - s;
 #endif 
 #ifdef CONFIG_ARCH_LOONGARCH
-      res = rdtime() - s;
+      res = drdtime() - s;
 #endif
     *results = res > UINT16_MAX ? UINT16_MAX : res;
     results++;

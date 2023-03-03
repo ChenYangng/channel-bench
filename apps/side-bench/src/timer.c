@@ -119,7 +119,7 @@ int timer_low(bench_env_t *env) {
 #ifdef CONFIG_ARCH_ARM
     SEL4BENCH_READ_CCNT(start);  
 #elif defined CONFIG_ARCH_LOONGARCH
-    start = rdtime();
+    start = drdtime();
 #else 
     start = rdtscp_64(); 
 #endif 
@@ -133,7 +133,7 @@ int timer_low(bench_env_t *env) {
 #ifdef CONFIG_ARCH_ARM
         SEL4BENCH_READ_CCNT(cur);  
 #elif defined CONFIG_ARCH_LOONGARCH
-        cur = rdtime();
+        cur = drdtime();
 #else        
         cur = rdtscp_64();
 #endif 

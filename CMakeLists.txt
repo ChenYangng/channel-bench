@@ -29,9 +29,10 @@ set(LibSel4MuslcSysMorecoreBytes 0x400000 CACHE INTERNAL "")
 
 # Set our custom domain schedule
 set(KernelDomainSchedule "${CMAKE_CURRENT_LIST_DIR}/domain_schedule.c" CACHE INTERNAL "")
+
 sel4_import_kernel()
 
-if((NOT ChannelBenchAllowSettingsOverride) AND (KernelArchARM OR KernelArchRiscV))
+if((NOT ChannelBenchAllowSettingsOverride) AND (KernelArchARM OR KernelArchRiscV OR KernelArchLoongarch))
     # Elfloader settings that correspond to how Data61 sets its boards up.
     ApplyData61ElfLoaderSettings(${KernelPlatform} ${KernelSel4Arch})
 endif()
