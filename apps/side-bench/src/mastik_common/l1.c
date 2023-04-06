@@ -69,9 +69,14 @@ static void *primelist(void *p, int segments, int seglen) {
 l1info_t l1_prepare(uint64_t *monitored_sets) {
   l1info_t l1 = (l1info_t)malloc(sizeof(struct l1info));
   l1->memory = mmap(0, L1_PROBE_BUFFER, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANON, -1, 0);
+#ifdef CONFIG_PLAT_3A5000
+  l1->memory = (void *)((((uintptr_t)l1->memory) + 0x3fff) & ~0x3fff);
+  assert((((uintptr_t)l1->memory) & 0x3fff) == 0);
+#else
   l1->memory = (void *)((((uintptr_t)l1->memory) + 0xfff) & ~0xfff);
-
   assert((((uintptr_t)l1->memory) & 0xfff) == 0);
+#endif
+
   l1->fwdlist = NULL;
   l1->bkwlist = NULL;
   for (int set = 0; set < L1_SETS; set++) {

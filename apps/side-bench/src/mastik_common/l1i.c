@@ -21,6 +21,13 @@
 extern void arm_branch_sets(void); 
 #endif 
 
+#ifdef CONFIG_ARCH_LOONGARCH
+#define JMP_OFFSET PAGE_SIZE
+#define JMP_OPCODE 0x14
+#define JMP(offset) ((JMP_OPCODE << 26) | (((offset & 0xffff) >> 2) << 10) | ((offset & 0x3ffffff) >> 16))
+#define RET_OPCODE 0x4c000020
+#define SET(way, set) (((void *)l1->memory) + L1I_STRIDE * (way) + L1I_CACHELINE * (set))
+#endif 
 
 #ifdef CONFIG_ARCH_X86
 l1iinfo_t l1i_prepare(uint64_t *monitored_sets) {
@@ -107,6 +114,53 @@ void l1i_rewrite(l1iinfo_t l1i) {
 
 }
 #endif
+
+#ifdef CONFIG_ARCH_LOONGARCH
+l1iinfo_t l1i_prepare(uint64_t *monitored_sets) {
+  
+  /*prepare the probing buffer according to the bitmask in monitored_sets*/
+  l1iinfo_t l1 = (l1iinfo_t)malloc(sizeof(struct l1iinfo));
+  l1->memory = mmap(0, L1_STRIDE * (L1I_ASSOCIATIVITY + 1), PROT_READ|PROT_WRITE|PROT_EXEC, MAP_PRIVATE|MAP_ANON, -1, 0);
+  printf("finished mmap\n");
+#ifdef CONFIG_PLAT_3A5000
+  l1->memory = (void *)((((uintptr_t)l1->memory) + 0x3fff) & ~0x3fff);
+  assert((((uintptr_t)l1->memory) & 0x3fff) == 0);
+#else
+  l1->memory = (void *)((((uintptr_t)l1->memory) + 0xfff) & ~0xfff);
+  assert((((uintptr_t)l1->memory) & 0xfff) == 0);
+#endif
+
+  for (int i = 0; i < L1I_SETS; i++) {
+    for (int j = 0; j < L1I_ASSOCIATIVITY - 1; j++) {
+      uint32_t *p = (uint32_t *)SET(j, i);
+      *p = JMP(JMP_OFFSET); 
+    }
+    *(uint32_t *)SET(L1I_ASSOCIATIVITY - 1, i) = RET_OPCODE;
+  }
+  l1i_set_monitored_set(l1, monitored_sets);
+  return l1;
+}
+
+void l1i_rewrite(l1iinfo_t l1i) {
+
+    void *line_ptr; 
+    unsigned long volatile content; 
+    assert(l1i->memory); 
+
+   /*rewrite the l1i probing buffer content, aligned by the
+    the cache line size*/ 
+
+    for (int i = 0; i < L1I_LINES; i++) {
+
+        line_ptr = l1i->memory + i * L1I_CACHELINE; 
+        asm volatile("ld.d %0, %1, 0 \n"
+                      "st.d %0, %1, 0 " : "=r" (content), "+r" (line_ptr): :);
+    }
+    dbar();
+
+}
+
+#endif 
 
 void l1i_set_monitored_set(l1iinfo_t l1, uint64_t *monitored_sets) {
   int nsets = 0;
@@ -203,3 +257,36 @@ void l1i_prime(l1iinfo_t l1) {
 
 #endif /*CONFIG_ARCH_ARM*/ 
 
+#ifdef CONFIG_ARCH_LOONGARCH
+void l1i_probe(l1iinfo_t l1, uint16_t *results) {
+
+    uint32_t start, res; 
+
+    for (int i = 0; i < l1->nsets; i++) {
+        start = drdtime();
+        // Using assembly because I am not sure I can trust the compiler
+        //asm volatile ("callq %0": : "r" (SET(0, l1->monitored[i])):);
+
+        /*for the total number of monitored cache sets 
+          do a probe, monitored contains the cache set number*/
+        asm volatile("jirl $ra, %0, 0": : "r" (SET(0, l1->monitored[i])));
+        res = drdtime() - start;
+        results[i] = res > UINT16_MAX ? UINT16_MAX : res;
+    }
+}
+
+
+void l1i_prime(l1iinfo_t l1) {
+
+    for (int i = 0; i < l1->nsets; i++) {
+
+        // Using assembly because I am not sure I can trust the compiler
+        //asm volatile ("callq %0": : "r" (SET(0, l1->monitored[i])):);
+
+        /*for the total number of monitored cache sets 
+          do a probe, monitored contains the cache set number*/
+        (*((fptr)SET(0, l1->monitored[i])))();
+    }
+}
+
+#endif /* CONFIG_ARCH_LOONGARCH */ 

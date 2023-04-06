@@ -8,8 +8,8 @@
 #include <channel-bench/bench_types.h>
 
 
-#define SPY_TLB_PAGES 32
-#define TROJAN_TLB_PAGES 64
+#define SPY_TLB_PAGES TLB_PROBE_PAGES
+#define TROJAN_TLB_PAGES TLB_ENTRIES
 
 
 static int32_t *buf;

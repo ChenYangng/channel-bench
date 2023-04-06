@@ -16,18 +16,22 @@
 #endif 
 
 #ifndef PAGE_SIZE
-#ifdef CONFIG_PLAT_3A5000
-#define PAGE_SIZE 16384
-#else
 #define PAGE_SIZE 4096
 #endif 
+
+#ifdef CONFIG_PLAT_3A5000
+#define PAGE_SIZE 16384
 #endif 
 
 #define ALIGN_PAGE_SIZE(_addr) (((uintptr_t)(_addr) + 0xfff) & ~0xfff) 
 
 
 /*the threshold for detecting a time tick*/
+#ifdef CONFIG_PLAT_3A5000
 #define TS_THRESHOLD 100000
+#else
+#define TS_THRESHOLD 100000
+#endif 
 
 #define X_4(a) a a a a 
 #define X_64(a) X_4(X_4(X_4(a)))
@@ -243,26 +247,17 @@
 #define L3_THRESHOLD       110
 #define L3_ASSOCIATIVITY   16
 #define L3_SIZE            (1*1024*1024)
-#define L3_CACHELINE       32
+#define L3_CACHELINE       64
 // The number of cache sets in each slice.
 #define L3_SETS_PER_SLICE  2048
 
 // The number of cache sets in each page
 #define L3_SETS_PER_PAGE   128
 
-/*the total probing group = groups * sets per page*/
-/*there are total 16 colours on L3 cache*/
-
-#if defined (CONFIG_MANAGER_MITIGATION) || defined(CONFIG_BENCH_COVERT_LLC_KERNEL) 
-#define L3_PROBE_GROUPS    8
-#else 
-#define L3_PROBE_GROUPS    16 
-#endif 
-#define BTAC_ENTRIES      512 
-
-/*the tlb attack probs on half of the TLB entries */
-#define TLB_ENTRIES       128 
-#define TLB_PROBE_PAGES    64
+#define BTAC_ENTRIES        32
+#define BHT_ENTRIES         64
+#define TLB_ENTRIES         32
+#define TLB_PROBE_PAGES     16
 
 #endif /* CONFIG_PLAT_3A5000  */
 
@@ -310,6 +305,10 @@ static inline void newTimeSlice(void) {
         if (cur - prev > TS_THRESHOLD) return;
         prev = cur;
     }
+}
+
+static inline void dbar() {
+  asm volatile("dbar 0": : :);
 }
 #endif /* CONFIG_ARCH_LOONGARCH */
 
